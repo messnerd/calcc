@@ -13,6 +13,7 @@ namespace CalcC.Tests
         {
             // Arrange
             const string code = "3 3 +";
+            Console.WriteLine("TestMethod CanCompileToCIL");
 
             // Act
             var calcc = new CalcC();
@@ -67,6 +68,28 @@ namespace CalcC.Tests
 
         //         // Assert
         //         Assert.IsInstanceOfType(exception.InnerException, expectedExceptionType);
+        //     }
+        // }
+
+        // [DataTestMethod]
+        // [DataRow("4 16 \t /", "4", "extra whitespaces")]
+        // [DataRow("4 16 ? /", "4", "unknown operands")]
+        // [DataRow("0 16 /", typeof(DivideByZeroException), "divide by zero")]
+        // [DataRow("        ", typeof(InvalidOperationException), "empty commands")]
+        // public void ColinExtraTests(string expr, string expectedResult, string label)
+        // {
+        //     lock (monitor)
+        //     {
+        //         // Arrange handled by DataRows
+
+        //         // Act
+        //         var calcc = new CalcC();
+        //         calcc.CompileToCil(expr);
+        //         calcc.AssembleToObjectCode();
+        //         var result = calcc.ExecuteObjectCode();
+
+        //         // Assert
+        //         Assert.AreEqual(expectedResult, result, label);
         //     }
         // }
     }

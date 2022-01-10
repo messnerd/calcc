@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using static CalcC.TokenType;
+using System.Text.RegularExpressions;
 
 namespace CalcC
 {
@@ -17,10 +18,82 @@ namespace CalcC
             // just split on spaces).
             var tokens = src.Split(' ').Select(t => t.Trim());
 
+            //var stack = new Stack<int>();
+            //var dictionary = new Dictionary<char,int>(); //not used?
+
             foreach (var token in tokens)
             {
                 var tokenType = GetTokenType(token);
 
+                if (tokenType == TokenType.Number)
+                {
+                    cil += @"
+    ldloc.0
+    ldc.i4.s " + token + @"
+    callvirt instance void class [System.Collections]System.Collections.Generic.Stack`1<int32>::Push(!0)";
+                }
+                else if (tokenType == TokenType.BinaryOperator)
+                {
+                    if (token == "+")
+                    {
+                        cil += @"
+    ldloc.0
+    ldloc.0
+    callvirt instance !0 class [System.Collections]System.Collections.Generic.Stack`1<int32>::Pop()
+    ldloc.0
+    callvirt instance !0 class [System.Collections]System.Collections.Generic.Stack`1<int32>::Pop()
+    add
+    callvirt instance void class [System.Collections]System.Collections.Generic.Stack`1<int32>::Push(!0)";
+                    }
+                    if (token == "-")
+                    {
+                        cil += @"
+    ldloc.0
+    ldloc.0
+    callvirt instance !0 class [System.Collections]System.Collections.Generic.Stack`1<int32>::Pop()
+    ldloc.0
+    callvirt instance !0 class [System.Collections]System.Collections.Generic.Stack`1<int32>::Pop()
+    sub
+    callvirt instance void class [System.Collections]System.Collections.Generic.Stack`1<int32>::Push(!0)";
+                    }
+                    if (token == "*")
+                    {
+                        cil += @"
+    ldloc.0
+    ldloc.0
+    callvirt instance !0 class [System.Collections]System.Collections.Generic.Stack`1<int32>::Pop()
+    ldloc.0
+    callvirt instance !0 class [System.Collections]System.Collections.Generic.Stack`1<int32>::Pop()
+    mul
+    callvirt instance void class [System.Collections]System.Collections.Generic.Stack`1<int32>::Push(!0)";
+                    }
+                    if (token == "/")
+                    {
+                        cil += @"
+    ldloc.0
+    ldloc.0
+    callvirt instance !0 class [System.Collections]System.Collections.Generic.Stack`1<int32>::Pop()
+    ldloc.0
+    callvirt instance !0 class [System.Collections]System.Collections.Generic.Stack`1<int32>::Pop()
+    div
+    callvirt instance void class [System.Collections]System.Collections.Generic.Stack`1<int32>::Push(!0)";
+                    }
+                    if (token == "%")
+                    {
+                        cil += @"
+    ldloc.0
+    ldloc.0
+    callvirt instance !0 class [System.Collections]System.Collections.Generic.Stack`1<int32>::Pop()
+    ldloc.0
+    callvirt instance !0 class [System.Collections]System.Collections.Generic.Stack`1<int32>::Pop()
+    rem
+    callvirt instance void class [System.Collections]System.Collections.Generic.Stack`1<int32>::Push(!0)";
+                    }
+                }
+                else
+                {
+                    throw new Exception();
+                }
                 // TODO:
                 // Finish the code in this loop to emit
                 // the correct CIL instructions based on the
@@ -38,8 +111,6 @@ namespace CalcC
                 // If you get stuck, think about what the
                 // code would look like in C# and use
                 // sharplab.io to see what the CIL would be.
-                
-                throw new NotImplementedException();
             }
 
             // Emit the postamble.
@@ -48,14 +119,32 @@ namespace CalcC
             Cil = cil;
         }
 
-        //
-        // TODO:
-        // Fill in this method so that it returns the type
-        // of token represented by the string.  The token
-        // types are given to you in TokenType.cs.
+        // Returns the type of token represented by the string
         private static TokenType GetTokenType(string token)
         {
-            throw new NotImplementedException();
+            switch (token)
+            {
+                case var x when new Regex(@"[0-9]").IsMatch(token):
+                    return TokenType.Number;
+
+                // case var x when new Regex(@"[]").IsMatch(token):
+                //     return TokenType.UnaryOperator;
+
+                case var x when new Regex(@"[+\-*\/%]").IsMatch(token):
+                    return TokenType.BinaryOperator;
+
+                // case var x when new Regex(@"[]").IsMatch(token):
+                //     return TokenType.StoreInstruction;
+
+                // case var x when new Regex(@"[]").IsMatch(token):
+                //     return TokenType.RetrieveInstruction;
+
+                // case var x when new Regex(@"[]").IsMatch(token):
+                //     return TokenType.Blank;
+
+                default:
+                    return TokenType.Unknown;
+            }
         }
 
         // Preamble:
@@ -80,6 +169,7 @@ namespace CalcC
     .maxstack 3
 
     // Declare two local vars: a Stack<int> and a Dictionary<char, int>
+    // Why do we need these? All test cases are int32, why cant we just load values directly?
     .locals init (
         [0] class [System.Collections]System.Collections.Generic.Stack`1<int32> stack,
         [1] class [System.Private.CoreLib]System.Collections.Generic.Dictionary`2<char, int32> registers

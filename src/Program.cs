@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 
 namespace CalcC
 {
@@ -6,7 +7,7 @@ namespace CalcC
     {
         static void Main(string[] _)
         {
-            const string expr = "2 2 +";
+            const string expr = "3 4 +";
 
             var compiler = new CalcC();
             compiler.CompileToCil(expr);
